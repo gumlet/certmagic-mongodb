@@ -14,6 +14,11 @@ go get github.com/gumlet/certmagic-mongodb
 Use it as your [certmagic](https://github.com/caddyserver/certmagic) default storage backend.
 
 ```go
+import (
+    mongoStore "github.com/gumlet/certmagic-mongodb"
+    // other dependencies....
+)
+
 database := "companydb"
 
 // Connect to MongoDB
