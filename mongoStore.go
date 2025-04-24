@@ -29,10 +29,14 @@ func NewMongoStorage(mongoClient *mongo.Client, database string) (*MongoStorage,
 		{
 			Keys:    bson.M{"key": 1},
 			Options: options.Index().SetUnique(true),
-		}
+		},
 	})
 
-	_, err := locks.Indexes().CreateMany(context.TODO(), []mongo.IndexModel{
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = locks.Indexes().CreateMany(context.TODO(), []mongo.IndexModel{
 		{
 			Keys:    bson.M{"key": 1},
 			Options: options.Index().SetUnique(true),
