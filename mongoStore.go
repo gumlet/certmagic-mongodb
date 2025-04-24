@@ -25,6 +25,13 @@ func NewMongoStorage(mongoClient *mongo.Client, database string) (*MongoStorage,
 	collection := mongoClient.Database(database).Collection("certmagic-storage")
 	locks := mongoClient.Database(database).Collection("certmagic-locks")
 
+	_, err := collection.Indexes().CreateMany(context.TODO(), []mongo.IndexModel{
+		{
+			Keys:    bson.M{"key": 1},
+			Options: options.Index().SetUnique(true),
+		}
+	})
+
 	_, err := locks.Indexes().CreateMany(context.TODO(), []mongo.IndexModel{
 		{
 			Keys:    bson.M{"key": 1},
