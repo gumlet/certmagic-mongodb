@@ -7,9 +7,9 @@ import (
 	"time"
 
 	"github.com/caddyserver/certmagic"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/v2/bson"
+	"go.mongodb.org/mongo-driver/v2/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
 
 // MongoStorage implements certmagic.Storage using MongoDB.
@@ -60,7 +60,7 @@ func (m *MongoStorage) Store(ctx context.Context, key string, value []byte) erro
 			"value": value,
 			"ts":    time.Now(),
 		}},
-		options.Update().SetUpsert(true),
+		options.UpdateOne().SetUpsert(true),
 	)
 	return err
 }
