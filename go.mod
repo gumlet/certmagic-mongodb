@@ -4,7 +4,7 @@ go 1.24.2
 
 require (
 	github.com/caddyserver/certmagic v0.24.0
-	go.mongodb.org/mongo-driver/v2 v2.3.0
+	go.mongodb.org/mongo-driver/v2 v2.4.2
 )
 
 require (
