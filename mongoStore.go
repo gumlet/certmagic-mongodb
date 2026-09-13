@@ -1,9 +1,10 @@
-package mongoStore
+package mongostore
 
 import (
 	"context"
 	"fmt"
 	"os"
+	"regexp"
 	"time"
 
 	"github.com/caddyserver/certmagic"
@@ -25,7 +26,15 @@ func NewMongoStorage(mongoClient *mongo.Client, database string) (*MongoStorage,
 	collection := mongoClient.Database(database).Collection("certmagic-storage")
 	locks := mongoClient.Database(database).Collection("certmagic-locks")
 
-	_, err := locks.Indexes().CreateMany(context.TODO(), []mongo.IndexModel{
+	_, err := collection.Indexes().CreateOne(context.Background(), mongo.IndexModel{
+		Keys:    bson.M{"key": 1},
+		Options: options.Index().SetUnique(true),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = locks.Indexes().CreateMany(context.Background(), []mongo.IndexModel{
 		{
 			Keys:    bson.M{"key": 1},
 			Options: options.Index().SetUnique(true),
@@ -77,11 +86,16 @@ func (m *MongoStorage) Load(ctx context.Context, key string) ([]byte, error) {
 	return result.Value, err
 }
 
-// Delete deletes a key
+// Delete deletes a key. If the key is a prefix of other keys, those are deleted too.
 func (m *MongoStorage) Delete(ctx context.Context, key string) error {
-	_, err := m.Collection.DeleteOne(ctx, bson.M{"key": key})
+	res, err := m.Collection.DeleteMany(ctx, bson.M{
+		"key": bson.M{"$regex": "^" + regexp.QuoteMeta(key) + "(/|$)"},
+	})
 	if err != nil {
 		return err
+	}
+	if res.DeletedCount == 0 {
+		return fmt.Errorf("MongoStorage.Delete key %s not found: %w", key, os.ErrNotExist)
 	}
 	return nil
 }
@@ -94,11 +108,12 @@ func (m *MongoStorage) Exists(ctx context.Context, key string) bool {
 
 // List lists keys prefixed by a string
 func (m *MongoStorage) List(ctx context.Context, prefix string, recursive bool) ([]string, error) {
-	filter := bson.M{"key": bson.M{"$regex": "^" + prefix}}
+	filter := bson.M{"key": bson.M{"$regex": "^" + regexp.QuoteMeta(prefix)}}
 	cursor, err := m.Collection.Find(ctx, filter)
 	if err != nil {
 		return nil, err
 	}
+	//nolint:errcheck
 	defer cursor.Close(ctx)
 
 	var keys []string
