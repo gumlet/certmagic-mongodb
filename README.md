@@ -1,6 +1,10 @@
 # Certmagic Storage Backend for MongoDB
 
+[![Go Reference](https://pkg.go.dev/badge/github.com/gumlet/certmagic-mongodb.svg)](https://pkg.go.dev/github.com/gumlet/certmagic-mongodb)
+
 This library allows you to use MongoDB as key/certificate storage backend for your Certmagic-enabled HTTPS server.
+
+Package documentation: https://pkg.go.dev/github.com/gumlet/certmagic-mongodb
 
 ## How to use
 
